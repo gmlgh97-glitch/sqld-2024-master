@@ -11,62 +11,91 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 <style>
   :root {
-    --bg: #f8fafc;
+    --bg: #f7f6f2; /* 부드러운 오프화이트/종이 미색 배경으로 눈부심 제로 */
     --card-bg: #ffffff;
-    --fg: #0f172a;
-    --fg-muted: #475569;
-    --sidebar-bg: #ffffff;
-    --header-bg: #0f172a;
-    --header-fg: #ffffff;
-    --border: #e2e8f0;
+    --fg: #1c1917; /* 부드러운 웜 블랙 (순수 블랙보다 눈 피로도 훨씬 낮음) */
+    --fg-muted: #57534e;
+    --sidebar-bg: #faf9f6;
+    --header-bg: #1e293b; /* 딥 슬레이트 네이비 */
+    --header-fg: #f8fafc;
+    --border: #e7e5e4;
     --accent: #2563eb;
-    --accent-soft: #eff6ff;
+    --accent-soft: #f1f5f9;
     --accent-hover: #1d4ed8;
-    --step1-bg: #f0fdf4;
-    --step1-border: #16a34a;
-    --step1-fg: #15803d;
-    --step2-bg: #eff6ff;
-    --step2-border: #2563eb;
-    --step2-fg: #1d4ed8;
-    --summary-bg: #fefce8;
-    --summary-border: #ca8a04;
+    --step1-bg: #f2f7f4; /* 편안한 세이지 그린 */
+    --step1-border: #2e7d32;
+    --step1-fg: #1b5e20;
+    --step2-bg: #f8fafc; /* 부드러운 소프트 그레이/블루 */
+    --step2-border: #475569;
+    --step2-fg: #1e293b;
+    --summary-bg: #fefce8; /* 따뜻한 크림 옐로우 */
+    --summary-border: #d97706;
     --warn-bg: #fff7ed;
     --warn-border: #ea580c;
     --danger-bg: #fef2f2;
     --danger-border: #dc2626;
-    --code-bg: #0f172a;
-    --table-head: #f1f5f9;
-    --table-stripe: #f8fafc;
-    --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    --code-bg: #1e293b;
+    --table-head: #f3f2ee;
+    --table-stripe: #faf9f6;
+    --shadow: 0 4px 20px -2px rgba(28, 25, 23, 0.05);
+  }
+  [data-theme="sepia"] {
+    --bg: #f4ecd8; /* E-Ink 리더 스타일 세피아 모드 */
+    --card-bg: #fcf8ee;
+    --fg: #382c1e;
+    --fg-muted: #6b5c49;
+    --sidebar-bg: #ece2cb;
+    --header-bg: #2d2418;
+    --header-fg: #f4ecd8;
+    --border: #dfd3bb;
+    --accent: #9a3412;
+    --accent-soft: #ede0c4;
+    --accent-hover: #7c2d12;
+    --step1-bg: #e8eee2;
+    --step1-border: #3f6212;
+    --step1-fg: #2b450b;
+    --step2-bg: #eee9dd;
+    --step2-border: #57534e;
+    --step2-fg: #292524;
+    --summary-bg: #fcf1d8;
+    --summary-border: #b45309;
+    --warn-bg: #fbeee0;
+    --warn-border: #c2410c;
+    --danger-bg: #fae8e8;
+    --danger-border: #b91c1c;
+    --code-bg: #2d2418;
+    --table-head: #ebe1c9;
+    --table-stripe: #f3e9d2;
+    --shadow: 0 4px 20px -2px rgba(45, 36, 24, 0.08);
   }
   [data-theme="dark"] {
-    --bg: #0b0f19;
-    --card-bg: #111827;
-    --fg: #f1f5f9;
+    --bg: #0f141c; /* 눈이 편안한 딥 챠콜 다크 */
+    --card-bg: #161d28;
+    --fg: #e2e8f0;
     --fg-muted: #94a3b8;
-    --sidebar-bg: #111827;
-    --header-bg: #030712;
+    --sidebar-bg: #141b24;
+    --header-bg: #0b0f15;
     --header-fg: #f8fafc;
-    --border: #1e293b;
-    --accent: #3b82f6;
-    --accent-soft: #1e293b;
-    --accent-hover: #60a5fa;
-    --step1-bg: #052e16;
+    --border: #232d3d;
+    --accent: #60a5fa;
+    --accent-soft: #1d2736;
+    --accent-hover: #93c5fd;
+    --step1-bg: #0f2419;
     --step1-border: #22c55e;
-    --step1-fg: #4ade80;
-    --step2-bg: #172554;
-    --step2-border: #3b82f6;
-    --step2-fg: #60a5fa;
-    --summary-bg: #272009;
+    --step1-fg: #86efac;
+    --step2-bg: #16202e;
+    --step2-border: #64748b;
+    --step2-fg: #cbd5e1;
+    --summary-bg: #292211;
     --summary-border: #eab308;
-    --warn-bg: #2a1205;
+    --warn-bg: #2c160b;
     --warn-border: #f97316;
-    --danger-bg: #2d0a0a;
+    --danger-bg: #2e1010;
     --danger-border: #ef4444;
-    --code-bg: #030712;
-    --table-head: #1e293b;
-    --table-stripe: #0f172a;
-    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    --code-bg: #0b0f15;
+    --table-head: #1c2635;
+    --table-stripe: #131a24;
+    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
   }
   * { box-sizing: border-box; }
   body {
@@ -592,7 +621,7 @@
         <button id="mode-btn" class="header-btn" onclick="toggleViewMode()" title="단원별 집중 보기 / 과목 전체 연속 보기 전환">📖 단원별 집중 보기</button>
         <button class="header-btn" onclick="changeFontSize(1)">가+</button>
         <button class="header-btn" onclick="changeFontSize(-1)">가-</button>
-        <button id="theme-btn" class="header-btn" onclick="toggleTheme()">🌙 다크</button>
+        <button id="theme-btn" class="header-btn" onclick="toggleTheme()">🌿 눈편한 라이트</button>
       </div>
     </div>
     <nav id="subject-tabs">
@@ -633,11 +662,18 @@
       document.getElementById("sidebar").classList.toggle("open");
     }
 
+    const THEMES = [
+      { id: "light", label: "🌿 눈편한 라이트" },
+      { id: "sepia", label: "📜 따뜻한 세피아" },
+      { id: "dark",  label: "🌙 다크 모드" }
+    ];
+    let currentThemeIdx = 0;
     function toggleTheme() {
-      const doc = document.documentElement;
-      const isDark = doc.getAttribute("data-theme") === "dark";
-      doc.setAttribute("data-theme", isDark ? "light" : "dark");
-      document.getElementById("theme-btn").textContent = isDark ? "🌙 다크" : "☀️ 라이트";
+      currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
+      const t = THEMES[currentThemeIdx];
+      document.documentElement.setAttribute("data-theme", t.id);
+      document.getElementById("theme-btn").textContent = t.label;
+      localStorage.setItem("sqld_theme", t.id);
     }
 
     function changeFontSize(delta) {
@@ -838,6 +874,15 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("sqld_theme");
+      if (savedTheme) {
+        const foundIdx = THEMES.findIndex(t => t.id === savedTheme);
+        if (foundIdx !== -1) {
+          currentThemeIdx = foundIdx;
+          document.documentElement.setAttribute("data-theme", savedTheme);
+          document.getElementById("theme-btn").textContent = THEMES[foundIdx].label;
+        }
+      }
       renderSidebar();
       renderReader();
     });
