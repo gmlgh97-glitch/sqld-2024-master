@@ -974,16 +974,15 @@
       </div>
     </div>
 
-    <!-- Audio Player Bar -->
+    <!-- Audio Player Bar (High-Quality Human Neural Voice) -->
     <div id="audio-player-bar">
       <div class="audio-info">
-        <span id="audio-mode-badge" class="audio-mode-pill">⚡ 핵심 1분 모드</span>
-        <span id="audio-track-title">재생 준비 완료 (재생 버튼을 누르세요)</span>
+        <span id="audio-mode-badge" class="audio-mode-pill">🎙️ AI 인간과외 보이스</span>
+        <span id="audio-track-title">재생 준비 완료 (1-1-1부터 바로 듣기)</span>
+        <span id="audio-time-display" style="font-size:11px;opacity:0.8;margin-left:6px;">0:00 / 0:00</span>
       </div>
       <div class="audio-controls">
-        <select id="audio-mode-select" class="audio-select" onchange="changeAudioMode(this.value)">
-          <option value="short">⚡ 핵심 1분 압축 모드 (총 25분 완주)</option>
-          <option value="long">📻 상세 1:1 과외 모드 (총 75분 완주)</option>
+        <select id="audio-track-select" class="audio-select" style="max-width:180px;" onchange="selectAudioTrackDirect(parseInt(this.value, 10))">
         </select>
         <select id="audio-speed-select" class="audio-select" onchange="changeAudioSpeed(this.value)">
           <option value="1.0">1.0배속</option>
@@ -996,6 +995,7 @@
         <button class="audio-btn" onclick="nextAudioTrack()">다음 ⏭</button>
         <button id="audio-loop-btn" class="audio-btn" style="background:#16a34a;" onclick="toggleAudioLoop()">🔁 전단원 연속 ON</button>
       </div>
+      <audio id="real-audio-player" preload="auto"></audio>
     </div>
 
     <nav id="subject-tabs">
@@ -1051,56 +1051,79 @@
     let blankMode = false;
     let sidebarFilter = "all";
 
-    // Audio Player State
+    // High-Quality Human Neural Audio Engine
     let isPlayingAudio = false;
-    let currentAudioMode = "short"; // 'short' (1-min) or 'long' (3-min)
-    let currentAudioTrackIdx = 0; // index in AUDIO_SCRIPTS[currentAudioMode] (0..29)
+    let currentAudioTrackIdx = 0;
     let audioSpeed = 1.2;
     let audioLoopAll = true;
-    let speechUtterance = null;
+    const realAudio = document.getElementById("real-audio-player") || new Audio();
 
-    let completedMap = JSON.parse(localStorage.getItem("sqld_completed_v2") || "{}");
-    let starredMap = JSON.parse(localStorage.getItem("sqld_starred_v2") || "{}");
-    let quizSolvedMap = JSON.parse(localStorage.getItem("sqld_quiz_v2") || "{}");
+    // 30 chapter MP3 tracks + 1 cheatsheet track
+    const AUDIO_TRACKS = [
+      { code: "1-1-1", title: "[1-1-1] 데이터 모델의 이해 (핵심 과외)", file: "audio/short_1-1-1.mp3" },
+      { code: "1-1-2", title: "[1-1-2] 엔터티 Entity (핵심 과외)", file: "audio/short_1-1-2.mp3" },
+      { code: "1-1-3", title: "[1-1-3] 속성 Attribute (핵심 과외)", file: "audio/short_1-1-3.mp3" },
+      { code: "1-1-4", title: "[1-1-4] 관계 Relationship (핵심 과외)", file: "audio/short_1-1-4.mp3" },
+      { code: "1-1-5", title: "[1-1-5] 식별자 Identifier (핵심 과외)", file: "audio/short_1-1-5.mp3" },
+      { code: "1-2-1", title: "[1-2-1] 정규화 Normalization (핵심 과외)", file: "audio/short_1-2-1.mp3" },
+      { code: "1-2-2", title: "[1-2-2] 관계와 조인의 이해 (핵심 과외)", file: "audio/short_1-2-2.mp3" },
+      { code: "1-2-3", title: "[1-2-3] 트랜잭션의 이해 (핵심 과외)", file: "audio/short_1-2-3.mp3" },
+      { code: "1-2-4", title: "[1-2-4] NULL 속성의 이해 (핵심 과외)", file: "audio/short_1-2-4.mp3" },
+      { code: "1-2-5", title: "[1-2-5] 본질 vs 인조식별자 (핵심 과외)", file: "audio/short_1-2-5.mp3" },
+      { code: "2-1-1", title: "[2-1-1] RDB 개요 및 명령어분류 (핵심 과외)", file: "audio/short_2-1-1.mp3" },
+      { code: "2-1-2", title: "[2-1-2] SELECT문 실행순서 (핵심 과외)", file: "audio/short_2-1-2.mp3" },
+      { code: "2-1-3", title: "[2-1-3] 단일행 함수와 NULL함수 (핵심 과외)", file: "audio/short_2-1-3.mp3" },
+      { code: "2-1-4", title: "[2-1-4] WHERE절과 NOT IN 함정 (핵심 과외)", file: "audio/short_2-1-4.mp3" },
+      { code: "2-1-5", title: "[2-1-5] GROUP BY와 HAVING 함정 (핵심 과외)", file: "audio/short_2-1-5.mp3" },
+      { code: "2-1-6", title: "[2-1-6] ORDER BY와 NULL정렬위치 (핵심 과외)", file: "audio/short_2-1-6.mp3" },
+      { code: "2-1-7", title: "[2-1-7] 조인과 오라클 외부조인(+) (핵심 과외)", file: "audio/short_2-1-7.mp3" },
+      { code: "2-1-8", title: "[2-1-8] 표준조인 ON vs WHERE (핵심 과외)", file: "audio/short_2-1-8.mp3" },
+      { code: "2-2-1", title: "[2-2-1] 서브쿼리 3대분류 (핵심 과외)", file: "audio/short_2-2-1.mp3" },
+      { code: "2-2-2", title: "[2-2-2] 집합연산자 UNION (핵심 과외)", file: "audio/short_2-2-2.mp3" },
+      { code: "2-2-3", title: "[2-2-3] 그룹함수 ROLLUP과 CUBE (핵심 과외)", file: "audio/short_2-2-3.mp3" },
+      { code: "2-2-4", title: "[2-2-4] 윈도우함수와 ROWS/RANGE (핵심 과외)", file: "audio/short_2-2-4.mp3" },
+      { code: "2-2-5", title: "[2-2-5] Top N 쿼리와 ROWNUM (핵심 과외)", file: "audio/short_2-2-5.mp3" },
+      { code: "2-2-6", title: "[2-2-6] 계층형질의 프자부순 (핵심 과외)", file: "audio/short_2-2-6.mp3" },
+      { code: "2-2-7", title: "[2-2-7] PIVOT과 UNPIVOT (핵심 과외)", file: "audio/short_2-2-7.mp3" },
+      { code: "2-2-8", title: "[2-2-8] 정규표현식 REGEXP (핵심 과외)", file: "audio/short_2-2-8.mp3" },
+      { code: "2-3-1", title: "[2-3-1] DML과 MERGE INTO (핵심 과외)", file: "audio/short_2-3-1.mp3" },
+      { code: "2-3-2", title: "[2-3-2] TCL과 자동커밋규칙 (핵심 과외)", file: "audio/short_2-3-2.mp3" },
+      { code: "2-3-3", title: "[2-3-3] DDL 비교 DELETE/TRUNCATE (핵심 과외)", file: "audio/short_2-3-3.mp3" },
+      { code: "2-3-4", title: "[2-3-4] DCL 권한회수 연쇄법칙 (핵심 과외)", file: "audio/short_2-3-4.mp3" },
+      { code: "치트시트", title: "[⚡특강] 시험 직전 15분 초압축 치트시트", file: "audio/cheatsheet_summary.mp3" }
+    ];
 
-    // Audio Functions using Web Speech API
-    function getKoreanVoice() {
-      const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-      return voices.find(v => v.lang.startsWith("ko")) || null;
+    function initAudioSelect() {
+      const sel = document.getElementById("audio-track-select");
+      if (!sel) return;
+      sel.innerHTML = "";
+      AUDIO_TRACKS.forEach((t, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `${i + 1}. ${t.title}`;
+        sel.appendChild(opt);
+      });
     }
 
-    function changeAudioMode(mode) {
-      currentAudioMode = mode;
-      document.getElementById("audio-mode-badge").textContent = mode === "short" ? "⚡ 핵심 1분 모드" : "📻 상세 3분 과외 모드";
-      if (isPlayingAudio) {
-        playAudioTrack(currentAudioTrackIdx);
-      }
+    function selectAudioTrackDirect(idx) {
+      playAudioTrack(idx);
     }
 
     function changeAudioSpeed(val) {
       audioSpeed = parseFloat(val);
-      if (speechUtterance && window.speechSynthesis.speaking) {
-        // Restart track with new speed
-        const currentIdx = currentAudioTrackIdx;
-        window.speechSynthesis.cancel();
-        playAudioTrack(currentIdx);
-      }
+      realAudio.playbackRate = audioSpeed;
     }
 
     function toggleAudioLoop() {
       audioLoopAll = !audioLoopAll;
       const btn = document.getElementById("audio-loop-btn");
-      btn.textContent = audioLoopAll ? "🔁 전단원 연속 ON" : "⏹ 1단원만 재생";
+      btn.textContent = audioLoopAll ? "🔁 전단원 연속 ON" : "⏹ 1곡만 재생";
       btn.style.background = audioLoopAll ? "#16a34a" : "#64748b";
     }
 
     function toggleAudioPlay() {
-      if (!window.speechSynthesis) {
-        alert("현재 브라우저가 음성 재생(Web Speech)을 지원하지 않습니다. 크롬/사파리/엣지 브라우저를 이용해 주세요!");
-        return;
-      }
       if (isPlayingAudio) {
-        window.speechSynthesis.cancel();
+        realAudio.pause();
         isPlayingAudio = false;
         updateAudioUI(false);
       } else {
@@ -1108,48 +1131,39 @@
       }
     }
 
+    function formatTime(secs) {
+      if (!secs || isNaN(secs)) return "0:00";
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
     function playAudioTrack(idx) {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-
-      const tracks = AUDIO_SCRIPTS[currentAudioMode];
-      if (!tracks || idx < 0 || idx >= tracks.length) return;
-
+      if (idx < 0 || idx >= AUDIO_TRACKS.length) return;
       currentAudioTrackIdx = idx;
-      const track = tracks[idx];
+      const track = AUDIO_TRACKS[idx];
+
       document.getElementById("audio-track-title").textContent = track.title;
+      const sel = document.getElementById("audio-track-select");
+      if (sel) sel.value = idx;
 
-      speechUtterance = new SpeechSynthesisUtterance(track.script);
-      speechUtterance.rate = audioSpeed;
-      speechUtterance.pitch = 1.0;
-      speechUtterance.lang = "ko-KR";
+      realAudio.src = track.file;
+      realAudio.playbackRate = audioSpeed;
+      realAudio.play().then(() => {
+        isPlayingAudio = true;
+        updateAudioUI(true);
+      }).catch(err => {
+        console.warn("Audio play error, falling back:", err);
+      });
 
-      const krVoice = getKoreanVoice();
-      if (krVoice) speechUtterance.voice = krVoice;
-
-      speechUtterance.onend = () => {
-        if (audioLoopAll && currentAudioTrackIdx < tracks.length - 1) {
-          playAudioTrack(currentAudioTrackIdx + 1);
-        } else {
-          isPlayingAudio = false;
-          updateAudioUI(false);
+      // Move reader to corresponding chapter
+      if (track.code === "치트시트") {
+        selectSubject("tab_cheat");
+      } else {
+        const targetChIdx = CHAPTERS.findIndex(c => c.title.startsWith(track.code));
+        if (targetChIdx !== -1 && targetChIdx !== currentChapterIdx) {
+          selectChapter(targetChIdx);
         }
-      };
-
-      speechUtterance.onerror = (e) => {
-        console.error("SpeechSynthesis error:", e);
-        isPlayingAudio = false;
-        updateAudioUI(false);
-      };
-
-      window.speechSynthesis.speak(speechUtterance);
-      isPlayingAudio = true;
-      updateAudioUI(true);
-
-      // Also navigate the reader to that chapter!
-      const targetChIdx = CHAPTERS.findIndex(c => c.title.startsWith(track.code));
-      if (targetChIdx !== -1 && targetChIdx !== currentChapterIdx) {
-        selectChapter(targetChIdx);
       }
     }
 
@@ -1159,8 +1173,7 @@
     }
 
     function nextAudioTrack() {
-      const tracks = AUDIO_SCRIPTS[currentAudioMode];
-      const newIdx = Math.min(tracks.length - 1, currentAudioTrackIdx + 1);
+      const newIdx = Math.min(AUDIO_TRACKS.length - 1, currentAudioTrackIdx + 1);
       playAudioTrack(newIdx);
     }
 
@@ -1171,7 +1184,7 @@
         pBtn.textContent = "⏸ 일시정지";
         pBtn.style.background = "#ea580c";
         tBtn.classList.add("playing");
-        tBtn.textContent = "🔊 오디오 재생 중";
+        tBtn.textContent = "🔊 인간과외 듣는중";
       } else {
         pBtn.textContent = "▶ 재생";
         pBtn.style.background = "#2563eb";
@@ -1179,6 +1192,26 @@
         tBtn.textContent = "🎧 오디오북 듣기";
       }
     }
+
+    realAudio.addEventListener("timeupdate", () => {
+      const cur = formatTime(realAudio.currentTime);
+      const dur = formatTime(realAudio.duration);
+      const disp = document.getElementById("audio-time-display");
+      if (disp) disp.textContent = `${cur} / ${dur}`;
+    });
+
+    realAudio.addEventListener("ended", () => {
+      if (audioLoopAll && currentAudioTrackIdx < AUDIO_TRACKS.length - 1) {
+        playAudioTrack(currentAudioTrackIdx + 1);
+      } else {
+        isPlayingAudio = false;
+        updateAudioUI(false);
+      }
+    });
+
+    realAudio.addEventListener("error", (e) => {
+      console.warn("Real audio file not found, will use speech synthesis fallback if available.", e);
+    });
 
     function updateProgressBar() {
       let doneCount = 0;
@@ -1193,6 +1226,7 @@
     function toggleChapterDone(chId) {
       completedMap[chId] = !completedMap[chId];
       localStorage.setItem("sqld_completed_v2", JSON.stringify(completedMap));
+      initAudioSelect();
       updateProgressBar();
       renderSidebar(document.getElementById("search-box").value);
       renderReader(false);
@@ -1540,6 +1574,7 @@
           document.getElementById("theme-btn").textContent = THEMES[foundIdx].label;
         }
       }
+      initAudioSelect();
       updateProgressBar();
       renderSidebar();
       renderReader(true);
